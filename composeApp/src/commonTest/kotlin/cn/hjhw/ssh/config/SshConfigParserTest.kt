@@ -25,7 +25,7 @@ class SshConfigParserTest {
         val host = config.hosts.first()
         assertEquals("test", host.host)
         assertEquals("198.51.100.10", host.hostName)
-        assertEquals("root", host.user)
+        assertEquals("testuser", host.user)
         assertEquals(2222, host.port)
         assertNotNull(host.identityFile)
         // identityFile 应该被展开为绝对路径
