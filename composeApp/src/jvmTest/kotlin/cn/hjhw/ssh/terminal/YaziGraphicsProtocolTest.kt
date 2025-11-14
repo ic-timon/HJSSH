@@ -1,6 +1,7 @@
 package cn.hjhw.ssh.terminal
 
 import java.io.ByteArrayOutputStream
+import kotlin.test.Ignore
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import net.schmizz.sshj.SSHClient
@@ -14,6 +15,7 @@ import org.junit.Test
  */
 class YaziGraphicsProtocolTest {
     @Test
+    @Ignore("Requires real SSH connection to external server")
     fun `test capture yazi graphics protocol data`() =
         runBlocking {
             val client = SSHClient()
