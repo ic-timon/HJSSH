@@ -44,7 +44,7 @@ jobs:
         run: ./gradlew build -x ktlintCheck -x ktlintFormat --no-daemon
 
       - name: Run tests
-        run: ./gradlew test --no-daemon
+        run: ./gradlew :composeApp:allTests --no-daemon
 
       - name: Upload test results
         if: always()
