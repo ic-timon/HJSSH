@@ -1,7 +1,7 @@
 # HJSSH 版本配置说明
 
 ## 当前版本
-**v0.0.1** (测试版本)
+**v1.0.0** (首个正式版本)
 
 ## 版本号配置位置
 
@@ -9,7 +9,7 @@
 **文件**: `composeApp/build.gradle.kts`
 ```kotlin
 nativeDistributions {
-    packageVersion = "0.0.1"  // ← 版本号配置
+    packageVersion = "1.0.0"  // ← 版本号配置
 }
 ```
 **用途**: 
@@ -21,10 +21,10 @@ nativeDistributions {
 ### 2. Git 标签（发布时使用）
 ```bash
 # 创建版本标签
-git tag -a v0.0.1 -m "Release version 0.0.1"
+git tag -a v1.0.0 -m "Release version 1.0.0"
 
 # 推送标签触发自动发布
-git push origin v0.0.1
+git push origin v1.0.0
 ```
 
 ## 版本号规范
@@ -35,17 +35,7 @@ git push origin v0.0.1
 
 ### 版本号含义
 
-- **v0.0.x** - 初期测试版本
-  - v0.0.1 - 首个测试版本
-  - v0.0.2 - 修复关键问题
-  - v0.0.3 - 继续完善
-
-- **v0.x.0** - 功能开发版本
-  - v0.1.0 - 基础功能完成
-  - v0.2.0 - 新增图形协议支持
-  - v0.3.0 - 新增多标签支持
-
-- **v1.0.0** - 首个正式稳定版本
+- **v1.0.0** - 首个正式稳定版本 ⭐ (当前)
   - 所有核心功能完成
   - 经过充分测试
   - 适合生产环境使用
@@ -76,18 +66,19 @@ cat composeApp/build.gradle.kts | grep packageVersion
 
 # 2. 提交版本更新
 git add composeApp/build.gradle.kts
-git commit -m "Bump version to 0.0.1"
+git commit -m "Bump version to 1.0.0"
 git push origin main
 
 # 3. 创建并推送标签
-git tag -a v0.0.1 -m "Release version 0.0.1
+git tag -a v1.0.0 -m "Release version 1.0.0
 
-测试功能:
-- SSH 连接
-- 终端显示
-- 基本编辑器支持
+完整功能:
+- 完整的 ANSI/VT100 支持
+- Kitty Graphics Protocol
+- Yazi 文件管理器集成
+- 多标签会话管理
 "
-git push origin v0.0.1
+git push origin v1.0.0
 ```
 
 ## 当前项目状态
@@ -103,9 +94,9 @@ git push origin v0.0.1
 - ✅ Emoji 和 Nerd Font 图标
 
 ### 版本建议
-- **v0.0.1** - 首次测试发布（当前）
-- **v0.1.0** - 内测版本（修复初期问题后）
-- **v1.0.0** - 正式发布（充分测试后）
+- **v1.0.0** - 首个正式版本（当前）⭐
+- **v1.1.0** - 功能增强版本（新增功能）
+- **v1.0.1** - Bug 修复版本（如有需要）
 
 ## 快速参考
 
@@ -120,12 +111,12 @@ git tag -l
 git describe --tags --abbrev=0
 
 # 查看标签详情
-git show v0.0.1
+git show v1.0.0
 ```
 
 ---
 
 **最后更新**: 2024-11-14
-**当前版本**: v0.0.1
-**下一计划版本**: v0.0.2 或 v0.1.0
+**当前版本**: v1.0.0
+**下一计划版本**: v1.1.0 或 v1.0.1
 

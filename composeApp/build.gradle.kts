@@ -75,7 +75,7 @@ compose.desktop {
             packageName = "HJSSH"
 
             // 应用版本
-            packageVersion = "0.0.1"
+            packageVersion = "1.0.0"
 
             // 应用描述
             description = "HJSSH - Modern SSH Terminal Emulator"
