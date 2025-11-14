@@ -1,0 +1,162 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送 v* 标签时触发（如 v1.0.0）
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            artifact: HJSSH-linux-x64.deb
+          - os: windows-latest
+            platform: windows
+            artifact: HJSSH-windows-x64.msi
+          - os: macos-latest
+            platform: macos
+            artifact: HJSSH-macos-x64.dmg
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        if: matrix.os != 'windows-latest'
+        run: chmod +x gradlew
+
+      - name: Build application package (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: ./gradlew :composeApp:packageDeb --no-daemon
+
+      - name: Build application package (Windows)
+        if: matrix.os == 'windows-latest'
+        run: .\gradlew.bat :composeApp:packageMsi --no-daemon
+
+      - name: Build application package (macOS)
+        if: matrix.os == 'macos-latest'
+        run: ./gradlew :composeApp:packageDmg --no-daemon
+
+      - name: Find built artifacts (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        id: find-artifacts-linux
+        run: |
+          DEB_FILE=$(find composeApp/build/compose/binaries/main/deb -name "*.deb" | head -n 1)
+          echo "artifact_path=$DEB_FILE" >> $GITHUB_OUTPUT
+          echo "artifact_name=$(basename $DEB_FILE)" >> $GITHUB_OUTPUT
+
+      - name: Find built artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        id: find-artifacts-windows
+        shell: pwsh
+        run: |
+          $MSI_FILE = Get-ChildItem -Path composeApp/build/compose/binaries/main/msi -Filter "*.msi" | Select-Object -First 1 -ExpandProperty FullName
+          echo "artifact_path=$MSI_FILE" >> $env:GITHUB_OUTPUT
+          echo "artifact_name=$(Split-Path $MSI_FILE -Leaf)" >> $env:GITHUB_OUTPUT
+
+      - name: Find built artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        id: find-artifacts-macos
+        run: |
+          DMG_FILE=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -n 1)
+          echo "artifact_path=$DMG_FILE" >> $GITHUB_OUTPUT
+          echo "artifact_name=$(basename $DMG_FILE)" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: HJSSH-${{ matrix.platform }}
+          path: ${{ steps.find-artifacts-linux.outputs.artifact_path || steps.find-artifacts-windows.outputs.artifact_path || steps.find-artifacts-macos.outputs.artifact_path }}
+
+  create-release:
+    name: Create Release
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## 🎉 HJSSH Release ${{ steps.get_version.outputs.VERSION }}
+            
+            ### 📦 下载 / Downloads
+            
+            - **Linux**: `.deb` 包，适用于 Ubuntu/Debian 系统
+            - **Windows**: `.msi` 安装包，适用于 Windows 10/11
+            - **macOS**: `.dmg` 镜像文件，适用于 macOS
+            
+            ### 🚀 安装说明 / Installation
+            
+            #### Linux (Ubuntu/Debian)
+            ```bash
+            sudo dpkg -i HJSSH-*.deb
+            sudo apt-get install -f  # 如果有依赖问题
+            ```
+            
+            #### Windows
+            双击 `.msi` 文件运行安装程序
+            
+            #### macOS
+            打开 `.dmg` 文件，将应用拖入 Applications 文件夹
+            
+            ### ✨ 主要功能 / Features
+            
+            - 🖥️ 现代化 SSH 终端模拟器
+            - 🎨 完整的 ANSI/VT100 转义序列支持
+            - 🖼️ Kitty Graphics Protocol 图形支持
+            - 📂 集成 Yazi 文件管理器预览
+            - 🎯 多标签会话管理
+            - 🔤 Emoji 和 Nerd Font 图标支持
+            - 📋 文本选择和复制功能
+            
+            ### 📄 许可证 / License
+            
+            MIT License - 详见 [LICENSE](LICENSE) 文件
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

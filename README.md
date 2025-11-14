@@ -1,6 +1,17 @@
-# HJSSH - Modern SSH Terminal Emulator | 现代化 SSH 终端模拟器
+# HJSSH - Modern SSH Terminal | 现代化 SSH 终端
+
+
 
 [English](#english) | [中文](#中文)
+
+[![GitHub Stars](https://img.shields.io/github/stars/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/stargazers)
+[![GitHub Watchers](https://img.shields.io/github/watchers/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/watchers)
+[![GitHub Forks](https://img.shields.io/github/forks/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/network)
+[![GitHub Issues](https://img.shields.io/github/issues/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/pulls)
+
+[![GitHub License](https://img.shields.io/github/license/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/blob/main/LICENSE)
+[![Version](https://img.shields.io/badge/version-v1.2.1-green.svg?style=flat-square)](https://github.com/ic-timon/HJSSH)
 
 ---
 
