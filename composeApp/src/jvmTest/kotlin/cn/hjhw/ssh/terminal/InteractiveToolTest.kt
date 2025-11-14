@@ -5,10 +5,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-/**
- * 交互式工具模拟测试
- * 这些测试模拟真实工具的输出序列
- */
+// 交互式工具模拟测试
+// 这些测试模拟真实工具的输出序列
 
 // nano 编辑器测试
 class NanoEditorTest : TerminalCompatibilityTestBase() {
