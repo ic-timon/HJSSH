@@ -39,7 +39,10 @@ interface SshConnection {
     /**
      * 调整终端大小
      */
-    suspend fun resize(width: Int, height: Int)
+    suspend fun resize(
+        width: Int,
+        height: Int,
+    )
 
     /**
      * 观察输出流
@@ -52,6 +55,3 @@ interface SshConnection {
      */
     suspend fun exec(command: String): String
 }
-
-
-

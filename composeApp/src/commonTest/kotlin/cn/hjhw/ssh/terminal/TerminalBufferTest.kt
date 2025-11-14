@@ -2,10 +2,9 @@ package cn.hjhw.ssh.terminal
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class TerminalBufferTest {
     @Test
@@ -30,9 +29,9 @@ class TerminalBufferTest {
     fun testNewLine() {
         val buffer = TerminalBuffer(80, 24)
         val initialTotal = buffer.totalLines()
-        
+
         buffer.newLine()
-        
+
         assertEquals(initialTotal + 1, buffer.totalLines())
         assertTrue(buffer.isAtBottom())
     }
@@ -40,21 +39,21 @@ class TerminalBufferTest {
     @Test
     fun testScrollUpDown() {
         val buffer = TerminalBuffer(80, 24)
-        
+
         // 添加一些行
         for (i in 0 until 10) {
             buffer.newLine()
         }
-        
+
         val totalBeforeScroll = buffer.totalLines()
         buffer.scrollUp(5)
-        
+
         assertEquals(5, buffer.getScrollOffset())
         assertFalse(buffer.isAtBottom())
-        
+
         buffer.scrollDown(3)
         assertEquals(2, buffer.getScrollOffset())
-        
+
         buffer.scrollToBottom()
         assertTrue(buffer.isAtBottom())
         assertEquals(0, buffer.getScrollOffset())
@@ -63,12 +62,12 @@ class TerminalBufferTest {
     @Test
     fun testScrollbackLimit() {
         val buffer = TerminalBuffer(80, 24, scrollbackSize = 100)
-        
+
         // 添加超过 scrollback 大小的行
         for (i in 0 until 150) {
             buffer.newLine()
         }
-        
+
         // 总行数应该被限制
         assertTrue(buffer.totalLines() <= 100 + 24)
     }
@@ -76,18 +75,17 @@ class TerminalBufferTest {
     @Test
     fun testClear() {
         val buffer = TerminalBuffer(80, 24)
-        
+
         // 添加一些行
         for (i in 0 until 10) {
             buffer.newLine()
         }
         buffer.scrollUp(5)
-        
+
         buffer.clear()
-        
+
         assertEquals(24, buffer.totalLines())
         assertTrue(buffer.isAtBottom())
         assertEquals(0, buffer.getScrollOffset())
     }
 }
-

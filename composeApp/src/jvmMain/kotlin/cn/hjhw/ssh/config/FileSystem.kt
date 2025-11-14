@@ -30,7 +30,10 @@ actual fun getDefaultSshConfigPath(): String {
     }
 }
 
-actual fun expandPathImpl(path: String, basePath: String): String {
+actual fun expandPathImpl(
+    path: String,
+    basePath: String,
+): String {
     if (path.isEmpty()) return path
 
     // 处理 ~ 展开
@@ -57,4 +60,3 @@ actual fun expandPathImpl(path: String, basePath: String): String {
 
     return path
 }
-

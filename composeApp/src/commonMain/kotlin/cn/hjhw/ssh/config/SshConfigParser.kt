@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
  */
 expect class FileSystem {
     fun readText(path: String): String?
+
     fun exists(path: String): Boolean
 }
 
@@ -23,19 +24,23 @@ class SshConfigParser(
      * @param configPath 配置文件路径
      * @return 解析后的 SSH 配置
      */
-    suspend fun parse(configPath: String): SshConfig = withContext(Dispatchers.IO) {
-        if (!fileSystem.exists(configPath)) {
-            return@withContext SshConfig(emptyList())
-        }
+    suspend fun parse(configPath: String): SshConfig =
+        withContext(Dispatchers.IO) {
+            if (!fileSystem.exists(configPath)) {
+                return@withContext SshConfig(emptyList())
+            }
 
-        val content = fileSystem.readText(configPath) ?: ""
-        parseContent(content, configPath)
-    }
+            val content = fileSystem.readText(configPath) ?: ""
+            parseContent(content, configPath)
+        }
 
     /**
      * 解析配置内容
      */
-    fun parseContent(content: String, basePath: String = ""): SshConfig {
+    fun parseContent(
+        content: String,
+        basePath: String = "",
+    ): SshConfig {
         val hosts = mutableListOf<SshHostConfig>()
         val lines = content.lines()
         var currentHost: String? = null
@@ -82,11 +87,12 @@ class SshConfigParser(
                     }
                     "proxycommand" -> currentConfig["proxyCommand"] = value
                     "forwardagent" -> {
-                        val boolValue = when (value.lowercase()) {
-                            "yes", "true", "1" -> "true"
-                            "no", "false", "0" -> "false"
-                            else -> null
-                        }
+                        val boolValue =
+                            when (value.lowercase()) {
+                                "yes", "true", "1" -> "true"
+                                "no", "false", "0" -> "false"
+                                else -> null
+                            }
                         if (boolValue != null) {
                             currentConfig["forwardAgent"] = boolValue
                         }
@@ -128,7 +134,10 @@ class SshConfigParser(
     /**
      * 展开路径（处理 ~ 和相对路径）
      */
-    private fun expandPath(path: String, basePath: String): String {
+    private fun expandPath(
+        path: String,
+        basePath: String,
+    ): String {
         return expandPathImpl(path, basePath)
     }
 
@@ -136,11 +145,12 @@ class SshConfigParser(
         /**
          * 解析默认路径的 SSH 配置文件
          */
-        suspend fun parse(): SshConfig = withContext(Dispatchers.IO) {
-            val parser = SshConfigParser()
-            val defaultPath = getDefaultSshConfigPath()
-            parser.parse(defaultPath)
-        }
+        suspend fun parse(): SshConfig =
+            withContext(Dispatchers.IO) {
+                val parser = SshConfigParser()
+                val defaultPath = getDefaultSshConfigPath()
+                parser.parse(defaultPath)
+            }
     }
 }
 
@@ -153,10 +163,12 @@ expect fun createFileSystem(): FileSystem
  * 展开路径（处理 ~ 和相对路径）
  * 平台特定实现
  */
-expect fun expandPathImpl(path: String, basePath: String): String
+expect fun expandPathImpl(
+    path: String,
+    basePath: String,
+): String
 
 /**
  * 获取默认的 SSH 配置文件路径
  */
 expect fun getDefaultSshConfigPath(): String
-

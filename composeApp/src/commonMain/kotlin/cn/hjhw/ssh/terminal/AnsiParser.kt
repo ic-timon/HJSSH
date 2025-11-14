@@ -43,13 +43,13 @@ class AnsiParser {
     }
 
     private var state = ParseState.NORMAL
-    private var previousState = ParseState.NORMAL  // 保存前一个状态（用于处理ESC \）
+    private var previousState = ParseState.NORMAL // 保存前一个状态（用于处理ESC \）
     private val parameters = mutableListOf<Int>()
     private var currentParameter = StringBuilder()
     private val oscData = StringBuilder()
-    private val apcData = StringBuilder()  // APC数据缓冲区（用于Kitty Graphics）
-    private var isPrivateMode = false  // DEC 私有模式标记
-    private var intermediateChar: Char? = null  // CSI 中间字符 (如 >, =, $, 空格等)
+    private val apcData = StringBuilder() // APC数据缓冲区（用于Kitty Graphics）
+    private var isPrivateMode = false // DEC 私有模式标记
+    private var intermediateChar: Char? = null // CSI 中间字符 (如 >, =, $, 空格等)
 
     /**
      * 解析输入数据并触发相应的终端操作
@@ -88,7 +88,7 @@ class AnsiParser {
         buffer: TerminalBuffer,
         onText: (Char, CellStyle) -> Unit,
         onControlSequence: (ControlSequence) -> Unit,
-        onResponse: (String) -> Unit = {},  // 新增：用于发送响应到SSH
+        onResponse: (String) -> Unit = {}, // 新增：用于发送响应到SSH
     ) {
         for (char in input) {
             when (state) {
@@ -120,7 +120,7 @@ class AnsiParser {
                         0x0A -> { // LF (Line Feed)
                             // 检查是否在滚动区域内
                             val scrollBottom = buffer.getScrollRegionBottom()
-                            
+
                             if (scrollBottom != null && cursor.y == scrollBottom) {
                                 // 光标在滚动区域底部，需要滚动
                                 buffer.newLine()
@@ -192,7 +192,7 @@ class AnsiParser {
                             // 如果光标在滚动区域顶部，在当前行上方插入空行（向下推内容）
                             // 否则，光标向上移动一行
                             val scrollTop = buffer.getScrollRegionTop() ?: 0
-                            
+
                             if (cursor.y == scrollTop) {
                                 // 光标在滚动区域顶部，插入空行（反向滚动）
                                 buffer.insertLineAt(cursor.y)
@@ -282,7 +282,7 @@ class AnsiParser {
                         }
                         // Intermediate characters: 0x20-0x2F (space to /)
                         // 以及特殊的 > = < 等
-                        char in ' '..'/' || char in '>'.. '>' || char == '=' || char == '<' -> {
+                        char in ' '..'/' || char in '>'..'>' || char == '=' || char == '<' -> {
                             // 存储 intermediate 字符（通常只有一个）
                             intermediateChar = char
                         }
@@ -292,13 +292,13 @@ class AnsiParser {
                                 parameters.add(currentParameter.toString().toIntOrNull() ?: 0)
                                 currentParameter.clear()
                             }
-                            
+
                             // 处理 CSI 命令
                             handleCsiCommand(char, parameters, cursor, buffer, onControlSequence, intermediateChar, onResponse)
                             state = ParseState.NORMAL
                             parameters.clear()
-                            isPrivateMode = false  // 重置私有模式标记
-                            intermediateChar = null  // 重置 intermediate 字符
+                            isPrivateMode = false // 重置私有模式标记
+                            intermediateChar = null // 重置 intermediate 字符
                         }
                     }
                 }
@@ -403,14 +403,14 @@ class AnsiParser {
         cursor: CursorState,
         buffer: TerminalBuffer,
         onControlSequence: (ControlSequence) -> Unit,
-        intermediate: Char? = null,  // CSI 中间字符
-        onResponse: (String) -> Unit = {},  // 响应回调
+        intermediate: Char? = null, // CSI 中间字符
+        onResponse: (String) -> Unit = {}, // 响应回调
     ) {
         // 注意：不同命令的默认值不同！
         // 对于移动命令（A/B/C/D），默认是 1
         // 对于清除命令（J/K），默认是 0
         // 对于光标位置（H/f），默认是 1
-        
+
         when (command) {
             'A' -> { // CUU - Cursor Up
                 val count = params.getOrElse(0) { 1 }
@@ -446,7 +446,7 @@ class AnsiParser {
                 cursor.moveTo(newX, newY)
             }
             'J' -> { // Erase in Display
-                val mode = params.getOrElse(0) { 0 }  // 默认值是 0
+                val mode = params.getOrElse(0) { 0 } // 默认值是 0
                 when (mode) {
                     0 -> { // 从光标到屏幕末尾
                         onControlSequence(ControlSequence.EraseDisplay(0))
@@ -462,7 +462,7 @@ class AnsiParser {
                 }
             }
             'K' -> { // Erase in Line
-                val mode = params.getOrElse(0) { 0 }  // 默认值是 0（从光标到行尾）
+                val mode = params.getOrElse(0) { 0 } // 默认值是 0（从光标到行尾）
                 handleEraseLine(mode, cursor, buffer)
             }
             'L' -> { // IL - Insert Line
@@ -485,15 +485,16 @@ class AnsiParser {
                 // ESC[nX - 从光标位置开始擦除 n 个字符（用空格替换）
                 val count = params.getOrElse(0) { 1 }
                 val line = buffer.getVisibleLine(cursor.y) ?: buffer.getCurrentLine()
-                val emptyCell = TerminalCell(
-                    char = ' ',
-                    foregroundColor = cursor.currentStyle.foregroundColor,
-                    backgroundColor = cursor.currentStyle.backgroundColor,
-                    reverse = cursor.currentStyle.reverse,
-                    bold = cursor.currentStyle.bold,
-                    faint = cursor.currentStyle.faint,
-                    underline = cursor.currentStyle.underline,
-                )
+                val emptyCell =
+                    TerminalCell(
+                        char = ' ',
+                        foregroundColor = cursor.currentStyle.foregroundColor,
+                        backgroundColor = cursor.currentStyle.backgroundColor,
+                        reverse = cursor.currentStyle.reverse,
+                        bold = cursor.currentStyle.bold,
+                        faint = cursor.currentStyle.faint,
+                        underline = cursor.currentStyle.underline,
+                    )
                 for (i in 0 until count) {
                     val x = cursor.x + i
                     if (x < buffer.getWidth()) {
@@ -581,19 +582,26 @@ class AnsiParser {
             else -> {
                 // 未知命令 - 只记录非常见的命令
                 if (command !in listOf('>', '$', ' ')) {
-                    println("      [AnsiParser] Unknown CSI command '$command' (0x${command.code.toString(16)}), params=$params, isPrivate=$isPrivateMode, intermediate=$intermediate")
+                    println(
+                        "      [AnsiParser] Unknown CSI command '$command' (0x${command.code.toString(
+                            16,
+                        )}), params=$params, isPrivate=$isPrivateMode, intermediate=$intermediate",
+                    )
                 }
             }
         }
     }
 
-    private fun handleSgr(params: List<Int>, cursor: CursorState) {
+    private fun handleSgr(
+        params: List<Int>,
+        cursor: CursorState,
+    ) {
         if (params.isEmpty()) {
             // 重置所有样式
             cursor.currentStyle = CellStyle.default()
             return
         }
-        
+
         // 调试：只打印非常见的 SGR 参数
         // if (params.any { it > 49 }) {
         //     println("      [AnsiParser] SGR params: $params")
@@ -631,11 +639,13 @@ class AnsiParser {
                 code in 30..37 -> {
                     // 标准前景色
                     val colorIndex = code - 30
-                    cursor.currentStyle = cursor.currentStyle.copy(
-                        foregroundColor = TerminalColor.Standard(
-                            TerminalColor.StandardColor.values()[colorIndex]
+                    cursor.currentStyle =
+                        cursor.currentStyle.copy(
+                            foregroundColor =
+                                TerminalColor.Standard(
+                                    TerminalColor.StandardColor.values()[colorIndex],
+                                ),
                         )
-                    )
                 }
                 code == 38 -> {
                     // 设置前景色（256色或TrueColor）
@@ -645,9 +655,10 @@ class AnsiParser {
                             5 -> { // 256色
                                 i++
                                 if (i < params.size) {
-                                    cursor.currentStyle = cursor.currentStyle.copy(
-                                        foregroundColor = TerminalColor.Indexed256(params[i])
-                                    )
+                                    cursor.currentStyle =
+                                        cursor.currentStyle.copy(
+                                            foregroundColor = TerminalColor.Indexed256(params[i]),
+                                        )
                                 }
                             }
                             2 -> { // TrueColor
@@ -657,9 +668,10 @@ class AnsiParser {
                                 val g = if (i < params.size) params[i] else 0
                                 i++
                                 val b = if (i < params.size) params[i] else 0
-                                cursor.currentStyle = cursor.currentStyle.copy(
-                                    foregroundColor = TerminalColor.TrueColor(r, g, b)
-                                )
+                                cursor.currentStyle =
+                                    cursor.currentStyle.copy(
+                                        foregroundColor = TerminalColor.TrueColor(r, g, b),
+                                    )
                             }
                         }
                     }
@@ -667,11 +679,13 @@ class AnsiParser {
                 code in 40..47 -> {
                     // 标准背景色
                     val colorIndex = code - 40
-                    cursor.currentStyle = cursor.currentStyle.copy(
-                        backgroundColor = TerminalColor.Standard(
-                            TerminalColor.StandardColor.values()[colorIndex]
+                    cursor.currentStyle =
+                        cursor.currentStyle.copy(
+                            backgroundColor =
+                                TerminalColor.Standard(
+                                    TerminalColor.StandardColor.values()[colorIndex],
+                                ),
                         )
-                    )
                 }
                 code == 48 -> {
                     // 设置背景色（256色或TrueColor）
@@ -681,9 +695,10 @@ class AnsiParser {
                             5 -> { // 256色
                                 i++
                                 if (i < params.size) {
-                                    cursor.currentStyle = cursor.currentStyle.copy(
-                                        backgroundColor = TerminalColor.Indexed256(params[i])
-                                    )
+                                    cursor.currentStyle =
+                                        cursor.currentStyle.copy(
+                                            backgroundColor = TerminalColor.Indexed256(params[i]),
+                                        )
                                 }
                             }
                             2 -> { // TrueColor
@@ -693,49 +708,59 @@ class AnsiParser {
                                 val g = if (i < params.size) params[i] else 0
                                 i++
                                 val b = if (i < params.size) params[i] else 0
-                                cursor.currentStyle = cursor.currentStyle.copy(
-                                    backgroundColor = TerminalColor.TrueColor(r, g, b)
-                                )
+                                cursor.currentStyle =
+                                    cursor.currentStyle.copy(
+                                        backgroundColor = TerminalColor.TrueColor(r, g, b),
+                                    )
                             }
                         }
                     }
                 }
                 code == 39 -> {
                     // 重置前景色
-                    cursor.currentStyle = cursor.currentStyle.copy(
-                        foregroundColor = TerminalColor.Default
-                    )
+                    cursor.currentStyle =
+                        cursor.currentStyle.copy(
+                            foregroundColor = TerminalColor.Default,
+                        )
                 }
                 code == 49 -> {
                     // 重置背景色
-                    cursor.currentStyle = cursor.currentStyle.copy(
-                        backgroundColor = TerminalColor.Default
-                    )
+                    cursor.currentStyle =
+                        cursor.currentStyle.copy(
+                            backgroundColor = TerminalColor.Default,
+                        )
                 }
                 code in 90..97 -> {
                     // 亮前景色（Bright foreground colors）
-                    val colorIndex = code - 90 + 8  // 映射到 BrightBlack(8) - BrightWhite(15)
-                    cursor.currentStyle = cursor.currentStyle.copy(
-                        foregroundColor = TerminalColor.Standard(
-                            TerminalColor.StandardColor.values()[colorIndex]
+                    val colorIndex = code - 90 + 8 // 映射到 BrightBlack(8) - BrightWhite(15)
+                    cursor.currentStyle =
+                        cursor.currentStyle.copy(
+                            foregroundColor =
+                                TerminalColor.Standard(
+                                    TerminalColor.StandardColor.values()[colorIndex],
+                                ),
                         )
-                    )
                 }
                 code in 100..107 -> {
                     // 亮背景色（Bright background colors）
-                    val colorIndex = code - 100 + 8  // 映射到 BrightBlack(8) - BrightWhite(15)
-                    cursor.currentStyle = cursor.currentStyle.copy(
-                        backgroundColor = TerminalColor.Standard(
-                            TerminalColor.StandardColor.values()[colorIndex]
+                    val colorIndex = code - 100 + 8 // 映射到 BrightBlack(8) - BrightWhite(15)
+                    cursor.currentStyle =
+                        cursor.currentStyle.copy(
+                            backgroundColor =
+                                TerminalColor.Standard(
+                                    TerminalColor.StandardColor.values()[colorIndex],
+                                ),
                         )
-                    )
                 }
             }
             i++
         }
     }
 
-    private fun handleOscCommand(data: String, onControlSequence: (ControlSequence) -> Unit) {
+    private fun handleOscCommand(
+        data: String,
+        onControlSequence: (ControlSequence) -> Unit,
+    ) {
         // 处理 OSC 命令（如设置窗口标题）
         when {
             data.startsWith("0;") || data.startsWith("2;") -> {
@@ -749,7 +774,7 @@ class AnsiParser {
             }
         }
     }
-    
+
     /**
      * 处理Kitty Graphics Protocol
      * 格式: ESC _ G key=value,key=value;base64data ESC \
@@ -758,18 +783,18 @@ class AnsiParser {
         data: String,
         cursor: CursorState,
         buffer: TerminalBuffer,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         try {
             // 简化日志：只在关键时刻打印
             // println("      [KittyGraphics] Parsing command, data length: ${data.length}")
-            
+
             val command = KittyProtocolParser.parse(data)
             if (command == null) {
                 println("      [KittyGraphics] Failed to parse command")
                 return
             }
-            
+
             when (command) {
                 is KittyGraphicsCommand.Transmit -> handleKittyTransmit(command, cursor, buffer, onResponse)
                 is KittyGraphicsCommand.Display -> handleKittyDisplay(command, cursor, buffer)
@@ -786,14 +811,16 @@ class AnsiParser {
         command: KittyGraphicsCommand.Transmit,
         cursor: CursorState,
         buffer: TerminalBuffer,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         val actualImageId = resolveActualImageId(command)
-        
+
         if (command.more > 0 && command.unicodePlaceholder) {
-            println("      [KittyGraphics] ⏰ FIRST CHUNK: id=$actualImageId, U=1, cursor=(${cursor.x},${cursor.y}), size=${command.width}x${command.height}, more=${command.more}")
+            println(
+                "      [KittyGraphics] ⏰ FIRST CHUNK: id=$actualImageId, U=1, cursor=(${cursor.x},${cursor.y}), size=${command.width}x${command.height}, more=${command.more}",
+            )
         }
-        
+
         buffer.addImage(
             imageId = actualImageId,
             imageNumber = command.imageNumber,
@@ -806,9 +833,9 @@ class AnsiParser {
             cursorX = cursor.x,
             cursorY = cursor.y,
             columns = command.columns,
-            rows = command.rows
+            rows = command.rows,
         )
-        
+
         if (command.more == 0) {
             finalizeKittyTransmission(command, actualImageId, cursor, buffer, onResponse)
         }
@@ -817,7 +844,7 @@ class AnsiParser {
     private fun handleKittyDisplay(
         command: KittyGraphicsCommand.Display,
         cursor: CursorState,
-        buffer: TerminalBuffer
+        buffer: TerminalBuffer,
     ) {
         println("      [KittyGraphics] Display command: imageId=${command.imageId}")
         buffer.placeImage(
@@ -827,25 +854,25 @@ class AnsiParser {
             y = cursor.y,
             columns = command.columns,
             rows = command.rows,
-            zIndex = command.zIndex
+            zIndex = command.zIndex,
         )
     }
 
     private fun handleKittyDelete(
         command: KittyGraphicsCommand.Delete,
-        buffer: TerminalBuffer
+        buffer: TerminalBuffer,
     ) {
         println("      [KittyGraphics] Delete command: mode=${command.deleteMode}, imageId=${command.imageId}")
         buffer.deleteImages(
             deleteMode = command.deleteMode,
             imageId = command.imageId,
-            placementId = command.placementId
+            placementId = command.placementId,
         )
     }
 
     private fun handleKittyQuery(
         command: KittyGraphicsCommand.Query,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         println("      [KittyGraphics] Query command: action=${command.action}, imageId=${command.imageId}")
         val response = "\u001b_Ga=q,s=1,i=${command.imageId};\u001b\\"
@@ -877,13 +904,13 @@ class AnsiParser {
         actualImageId: Int,
         cursor: CursorState,
         buffer: TerminalBuffer,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         if (command.imageNumber > 0) {
             imageNumberToIdMap.remove(command.imageNumber)
         }
         currentTransmittingImageId = null
-        
+
         if (command.action == 't' || command.action == 'T') {
             buffer.placeImage(
                 imageId = actualImageId,
@@ -892,52 +919,58 @@ class AnsiParser {
                 y = cursor.y,
                 columns = command.columns,
                 rows = command.rows,
-                zIndex = command.zIndex
+                zIndex = command.zIndex,
             )
         }
-        
+
         if (command.quiet != 1) {
-            val response = "\u001b_Gi=${actualImageId};OK\u001b\\"
+            val response = "\u001b_Gi=$actualImageId;OK\u001b\\"
             onResponse(response)
             println("      [KittyGraphics] ✅ Sent OK response for image id=$actualImageId (U=${command.unicodePlaceholder})")
         }
     }
-    
+
     private var nextImageId = 1
     private var nextPlacementId = 1
-    
+
     // 用于追踪imageNumber到actualImageId的映射（多块传输）
     private val imageNumberToIdMap = mutableMapOf<Int, Int>()
-    
+
     // 用于追踪当前正在传输的图片ID（无论是显式还是隐式）
     private var currentTransmittingImageId: Int? = null
-    
+
     private fun generateImageId(): Int = nextImageId++
+
     private fun generatePlacementId(): Int = nextPlacementId++
-    
+
     /**
      * 处理清行命令 (CSI K)
      */
-    private fun handleEraseLine(mode: Int, cursor: CursorState, buffer: TerminalBuffer) {
+    private fun handleEraseLine(
+        mode: Int,
+        cursor: CursorState,
+        buffer: TerminalBuffer,
+    ) {
         val line = buffer.getVisibleLine(cursor.y) ?: buffer.getCurrentLine()
         val width = buffer.getWidth()
-        
+
         // 日志已禁用（性能优化）
-        
+
         when (mode) {
             0 -> {
                 // 从光标到行末尾
                 // println("      [AnsiParser] Erasing from cursor to end of line (${cursor.x} to ${width-1}), current style: reverse=${cursor.currentStyle.reverse}")
                 for (x in cursor.x until width) {
-                    val emptyCell = TerminalCell(
-                        char = ' ',
-                        foregroundColor = cursor.currentStyle.foregroundColor,
-                        backgroundColor = cursor.currentStyle.backgroundColor,
-                        reverse = cursor.currentStyle.reverse,
-                        bold = cursor.currentStyle.bold,
-                        faint = cursor.currentStyle.faint,
-                        underline = cursor.currentStyle.underline,
-                    )
+                    val emptyCell =
+                        TerminalCell(
+                            char = ' ',
+                            foregroundColor = cursor.currentStyle.foregroundColor,
+                            backgroundColor = cursor.currentStyle.backgroundColor,
+                            reverse = cursor.currentStyle.reverse,
+                            bold = cursor.currentStyle.bold,
+                            faint = cursor.currentStyle.faint,
+                            underline = cursor.currentStyle.underline,
+                        )
                     line.setCell(x, emptyCell)
                 }
             }
@@ -945,15 +978,16 @@ class AnsiParser {
                 // 从行开头到光标（包括光标位置）
                 // println("      [AnsiParser] Erasing from start of line to cursor (0 to ${cursor.x})")
                 for (x in 0..cursor.x) {
-                    val emptyCell = TerminalCell(
-                        char = ' ',
-                        foregroundColor = cursor.currentStyle.foregroundColor,
-                        backgroundColor = cursor.currentStyle.backgroundColor,
-                        reverse = cursor.currentStyle.reverse,
-                        bold = cursor.currentStyle.bold,
-                        faint = cursor.currentStyle.faint,
-                        underline = cursor.currentStyle.underline,
-                    )
+                    val emptyCell =
+                        TerminalCell(
+                            char = ' ',
+                            foregroundColor = cursor.currentStyle.foregroundColor,
+                            backgroundColor = cursor.currentStyle.backgroundColor,
+                            reverse = cursor.currentStyle.reverse,
+                            bold = cursor.currentStyle.bold,
+                            faint = cursor.currentStyle.faint,
+                            underline = cursor.currentStyle.underline,
+                        )
                     line.setCell(x, emptyCell)
                 }
             }
@@ -961,29 +995,34 @@ class AnsiParser {
                 // 清除整行
                 // println("      [AnsiParser] Erasing entire line (0 to ${width-1})")
                 for (x in 0 until width) {
-                    val emptyCell = TerminalCell(
-                        char = ' ',
-                        foregroundColor = cursor.currentStyle.foregroundColor,
-                        backgroundColor = cursor.currentStyle.backgroundColor,
-                        reverse = cursor.currentStyle.reverse,
-                        bold = cursor.currentStyle.bold,
-                        faint = cursor.currentStyle.faint,
-                        underline = cursor.currentStyle.underline,
-                    )
+                    val emptyCell =
+                        TerminalCell(
+                            char = ' ',
+                            foregroundColor = cursor.currentStyle.foregroundColor,
+                            backgroundColor = cursor.currentStyle.backgroundColor,
+                            reverse = cursor.currentStyle.reverse,
+                            bold = cursor.currentStyle.bold,
+                            faint = cursor.currentStyle.faint,
+                            underline = cursor.currentStyle.underline,
+                        )
                     line.setCell(x, emptyCell)
                 }
             }
         }
     }
-    
+
     /**
      * 处理插入行命令 (CSI L)
      */
-    private fun handleInsertLine(count: Int, buffer: TerminalBuffer, cursor: CursorState) {
+    private fun handleInsertLine(
+        count: Int,
+        buffer: TerminalBuffer,
+        cursor: CursorState,
+    ) {
         val height = buffer.getHeight()
         val width = buffer.getWidth()
         val linesToInsert = count.coerceAtLeast(1)
-        
+
         // 在光标位置插入空行
         for (i in 0 until linesToInsert) {
             if (cursor.y < height) {
@@ -996,28 +1035,36 @@ class AnsiParser {
             }
         }
     }
-    
+
     /**
      * 处理删除行命令 (CSI M)
      */
-    private fun handleDeleteLine(count: Int, buffer: TerminalBuffer, cursor: CursorState) {
+    private fun handleDeleteLine(
+        count: Int,
+        buffer: TerminalBuffer,
+        cursor: CursorState,
+    ) {
         val linesToDelete = count.coerceAtLeast(1)
-        
+
         // 删除光标所在行及其下方的行
         // 在底部插入空行
         for (i in 0 until linesToDelete) {
             // TODO: 需要在 TerminalBuffer 中实现删除行功能
         }
     }
-    
+
     /**
      * 处理删除字符命令 (CSI P)
      */
-    private fun handleDeleteCharacter(count: Int, buffer: TerminalBuffer, cursor: CursorState) {
+    private fun handleDeleteCharacter(
+        count: Int,
+        buffer: TerminalBuffer,
+        cursor: CursorState,
+    ) {
         val line = buffer.getVisibleLine(cursor.y) ?: buffer.getCurrentLine()
         val width = buffer.getWidth()
         val charsToDelete = count.coerceAtLeast(1)
-        
+
         // 删除光标位置的字符，后续字符左移
         for (i in 0 until charsToDelete) {
             if (cursor.x < width) {
@@ -1025,28 +1072,33 @@ class AnsiParser {
             }
         }
     }
-    
+
     /**
      * 处理插入字符命令 (CSI @)
      */
-    private fun handleInsertCharacter(count: Int, buffer: TerminalBuffer, cursor: CursorState) {
+    private fun handleInsertCharacter(
+        count: Int,
+        buffer: TerminalBuffer,
+        cursor: CursorState,
+    ) {
         val line = buffer.getVisibleLine(cursor.y) ?: buffer.getCurrentLine()
         val width = buffer.getWidth()
         val charsToInsert = count.coerceAtLeast(1)
-        
+
         // 在光标位置插入空字符，后续字符右移
         for (i in 0 until charsToInsert) {
             if (cursor.x < width) {
-                val emptyCell = TerminalCell(
-                    char = ' ',
-                    foregroundColor = cursor.currentStyle.foregroundColor,
-                    backgroundColor = cursor.currentStyle.backgroundColor,
-                )
+                val emptyCell =
+                    TerminalCell(
+                        char = ' ',
+                        foregroundColor = cursor.currentStyle.foregroundColor,
+                        backgroundColor = cursor.currentStyle.backgroundColor,
+                    )
                 line.insertAt(cursor.x, emptyCell)
             }
         }
     }
-    
+
     /**
      * 处理 DEC 私有模式设置 (CSI ? ... h)
      */
@@ -1054,7 +1106,7 @@ class AnsiParser {
         params: List<Int>,
         buffer: TerminalBuffer,
         cursor: CursorState,
-        onControlSequence: (ControlSequence) -> Unit
+        onControlSequence: (ControlSequence) -> Unit,
     ) {
         for (param in params) {
             when (param) {
@@ -1074,7 +1126,7 @@ class AnsiParser {
                 }
                 1049 -> {
                     // 1049 - Enable alternate screen buffer and save cursor
-                    cursor.saveForAltScreen()  // 使用独立的保存位置
+                    cursor.saveForAltScreen() // 使用独立的保存位置
                     buffer.switchToAlternateScreen()
                     // 切换到 alternate screen 后，重置光标到 (0, 0)
                     cursor.moveTo(0, 0)
@@ -1085,7 +1137,7 @@ class AnsiParser {
             }
         }
     }
-    
+
     /**
      * 处理 DEC 私有模式重置 (CSI ? ... l)
      */
@@ -1093,7 +1145,7 @@ class AnsiParser {
         params: List<Int>,
         buffer: TerminalBuffer,
         cursor: CursorState,
-        onControlSequence: (ControlSequence) -> Unit
+        onControlSequence: (ControlSequence) -> Unit,
     ) {
         for (param in params) {
             when (param) {
@@ -1111,7 +1163,7 @@ class AnsiParser {
                 1049 -> {
                     // 1049 - Restore normal screen buffer and restore cursor
                     buffer.switchToMainScreen()
-                    cursor.restoreFromAltScreen()  // 使用独立的恢复位置
+                    cursor.restoreFromAltScreen() // 使用独立的恢复位置
                 }
                 else -> {
                     // 其他私有模式，暂时忽略
@@ -1127,14 +1179,14 @@ class AnsiParser {
         params: List<Int>,
         isPrivateMode: Boolean,
         cursor: CursorState,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         val requestType = params.getOrElse(0) { 0 }
-        
+
         when {
             // DSR - Device Status Report: CSI 5 n
             requestType == 5 && !isPrivateMode -> {
-                val response = "\u001b[0n"  // Terminal OK
+                val response = "\u001b[0n" // Terminal OK
                 onResponse(response)
                 println("      [AnsiParser] Responded to DSR: Terminal OK")
             }
@@ -1160,7 +1212,7 @@ class AnsiParser {
         params: List<Int>,
         isPrivateMode: Boolean,
         intermediate: Char?,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         when {
             // Primary DA: CSI c or CSI 0 c
@@ -1171,7 +1223,7 @@ class AnsiParser {
                 onResponse(response)
                 println("      [AnsiParser] Responded to DA1 (Primary Device Attributes)")
             }
-            
+
             // Secondary DA: CSI > c or CSI > 0 c
             !isPrivateMode && (params.isEmpty() || params[0] == 0) && intermediate == '>' -> {
                 // 响应：VT220, firmware version 10.0
@@ -1179,7 +1231,7 @@ class AnsiParser {
                 onResponse(response)
                 println("      [AnsiParser] Responded to DA2 (Secondary Device Attributes)")
             }
-            
+
             // Tertiary DA: CSI = c
             !isPrivateMode && intermediate == '=' -> {
                 // 响应：Unit ID (all zeros)
@@ -1196,7 +1248,7 @@ class AnsiParser {
     private fun handleTerminalParameters(
         params: List<Int>,
         isPrivateMode: Boolean,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         if (!isPrivateMode && params.isNotEmpty()) {
             val sol = params[0]
@@ -1216,36 +1268,37 @@ class AnsiParser {
      */
     private fun handleDecRequestMode(
         params: List<Int>,
-        onResponse: (String) -> Unit
+        onResponse: (String) -> Unit,
     ) {
         if (params.isEmpty()) return
-        
+
         val mode = params[0]
         // 根据不同的模式返回不同的状态
         // 大多数模式我们返回 0 (不识别) 或 2 (未设置)
-        val value = when (mode) {
-            // 常见的 DEC 私有模式
-            1 -> 2      // DECCKM - Cursor Keys Mode (未设置，使用普通模式)
-            3 -> 2      // DECCOLM - 80/132 Column Mode (未设置，使用80列)
-            6 -> 2      // DECOM - Origin Mode (未设置，使用绝对定位)
-            7 -> 2      // DECAWM - Auto Wrap Mode (未设置，自动换行关闭)
-            12 -> 2     // Start Blinking Cursor (未设置)
-            25 -> 1     // DECTCEM - Text Cursor Enable Mode (设置，光标可见)
-            1000 -> 2   // Send Mouse X & Y on button press (未设置)
-            1001 -> 2   // Use Hilite Mouse Tracking (未设置)
-            1002 -> 2   // Use Cell Motion Mouse Tracking (未设置)
-            1003 -> 2   // Use All Motion Mouse Tracking (未设置)
-            1004 -> 2   // Send FocusIn/FocusOut events (未设置)
-            1005 -> 2   // Enable UTF-8 Mouse Mode (未设置)
-            1006 -> 2   // Enable SGR Mouse Mode (未设置)
-            1007 -> 2   // Enable Alternate Scroll Mode (未设置)
-            1047 -> 2   // Use Alternate Screen Buffer (取决于当前状态)
-            1048 -> 2   // Save cursor (未设置)
-            1049 -> 2   // Save cursor and use Alternate Screen Buffer (未设置)
-            2004 -> 2   // Bracketed Paste Mode (未设置)
-            else -> 0   // 不识别的模式
-        }
-        
+        val value =
+            when (mode) {
+                // 常见的 DEC 私有模式
+                1 -> 2 // DECCKM - Cursor Keys Mode (未设置，使用普通模式)
+                3 -> 2 // DECCOLM - 80/132 Column Mode (未设置，使用80列)
+                6 -> 2 // DECOM - Origin Mode (未设置，使用绝对定位)
+                7 -> 2 // DECAWM - Auto Wrap Mode (未设置，自动换行关闭)
+                12 -> 2 // Start Blinking Cursor (未设置)
+                25 -> 1 // DECTCEM - Text Cursor Enable Mode (设置，光标可见)
+                1000 -> 2 // Send Mouse X & Y on button press (未设置)
+                1001 -> 2 // Use Hilite Mouse Tracking (未设置)
+                1002 -> 2 // Use Cell Motion Mouse Tracking (未设置)
+                1003 -> 2 // Use All Motion Mouse Tracking (未设置)
+                1004 -> 2 // Send FocusIn/FocusOut events (未设置)
+                1005 -> 2 // Enable UTF-8 Mouse Mode (未设置)
+                1006 -> 2 // Enable SGR Mouse Mode (未设置)
+                1007 -> 2 // Enable Alternate Scroll Mode (未设置)
+                1047 -> 2 // Use Alternate Screen Buffer (取决于当前状态)
+                1048 -> 2 // Save cursor (未设置)
+                1049 -> 2 // Save cursor and use Alternate Screen Buffer (未设置)
+                2004 -> 2 // Bracketed Paste Mode (未设置)
+                else -> 0 // 不识别的模式
+            }
+
         val response = "\u001b[?$mode;${value}\$y"
         onResponse(response)
         println("      [AnsiParser] Responded to DECRQM mode=$mode, value=$value")
@@ -1257,11 +1310,16 @@ class AnsiParser {
  */
 sealed class ControlSequence {
     object Bell : ControlSequence()
+
     object Reset : ControlSequence()
+
     data class EraseDisplay(val mode: Int) : ControlSequence()
+
     data class EraseLine(val mode: Int) : ControlSequence()
+
     data class SetTitle(val title: String) : ControlSequence()
+
     data class ScrollUp(val lines: Int) : ControlSequence()
+
     data class ScrollDown(val lines: Int) : ControlSequence()
 }
-

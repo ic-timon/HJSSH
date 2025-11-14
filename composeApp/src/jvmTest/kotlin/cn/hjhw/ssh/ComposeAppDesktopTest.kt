@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class ComposeAppDesktopTest {
-
     @Test
     fun example() {
         assertEquals(3, 1 + 2)

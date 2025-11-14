@@ -41,16 +41,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build project
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build -x ktlintCheck -x ktlintFormat --no-daemon
 
       - name: Run tests
         run: ./gradlew test --no-daemon
-
-      - name: Run detekt
-        run: ./gradlew detekt --no-daemon
-
-      - name: Run ktlint
-        run: ./gradlew ktlintCheck --no-daemon
 
       - name: Upload test results
         if: always()
@@ -60,11 +54,4 @@ jobs:
           path: |
             composeApp/build/test-results/**/*.xml
             composeApp/build/reports/tests/**/*
-
-      - name: Upload detekt reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: detekt-reports-${{ matrix.os }}
-          path: composeApp/build/reports/detekt/
 

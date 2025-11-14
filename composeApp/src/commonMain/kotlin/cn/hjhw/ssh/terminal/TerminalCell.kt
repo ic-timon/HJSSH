@@ -15,7 +15,7 @@ data class TerminalCell(
     val blink: Boolean = false,
     val reverse: Boolean = false,
     val invisible: Boolean = false,
-    val isWideChar: Boolean = false,        // 是否是宽字符（如中文，占2个单元格）
+    val isWideChar: Boolean = false, // 是否是宽字符（如中文，占2个单元格）
     val isWideContinuation: Boolean = false, // 是否是宽字符的延续单元格（不渲染）
 ) {
     /**
@@ -72,5 +72,3 @@ sealed class TerminalColor {
      */
     data class TrueColor(val r: Int, val g: Int, val b: Int) : TerminalColor()
 }
-
-

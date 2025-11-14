@@ -4,18 +4,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.sp
+import org.jetbrains.skia.Data
 import org.jetbrains.skia.Font
-import org.jetbrains.skia.Paint
-import org.jetbrains.skia.Typeface
 import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.FontStyle
-import org.jetbrains.skia.Data
+import org.jetbrains.skia.Paint
+import org.jetbrains.skia.Typeface
 
 /**
  * JVM 平台的文本渲染器实现
@@ -27,47 +21,47 @@ actual object TextRenderer {
     private var nerdFontBold: Typeface? = null
     private var nerdFontItalic: Typeface? = null
     private var emojiFont: Typeface? = null
-    
+
     // 后备字体（如果嵌入字体加载失败）
     private var cachedTypeface: Typeface? = null
     private var cachedBoldTypeface: Typeface? = null
     private var cachedCjkTypeface: Typeface? = null
     private val fontMgr = FontMgr.default
-    
+
     // 是否已初始化
     private var initialized = false
-    
+
     /**
      * 初始化字体 - 从资源加载嵌入的字体
      */
     fun initialize() {
         if (initialized) return
-        
+
         try {
             println("[TextRenderer] 🔤 Initializing fonts...")
-            
+
             // 加载 JetBrains Mono Nerd Font
             loadFont("fonts/JetBrainsMonoNerdFont-Regular.ttf")?.let {
                 nerdFontRegular = it
                 println("[TextRenderer] ✅ Loaded: JetBrains Mono Nerd Font Regular")
             }
-            
+
             loadFont("fonts/JetBrainsMonoNerdFont-Bold.ttf")?.let {
                 nerdFontBold = it
                 println("[TextRenderer] ✅ Loaded: JetBrains Mono Nerd Font Bold")
             }
-            
+
             loadFont("fonts/JetBrainsMonoNerdFont-Italic.ttf")?.let {
                 nerdFontItalic = it
                 println("[TextRenderer] ✅ Loaded: JetBrains Mono Nerd Font Italic")
             }
-            
+
             // 加载 Noto Color Emoji
             loadFont("fonts/NotoColorEmoji.ttf")?.let {
                 emojiFont = it
                 println("[TextRenderer] ✅ Loaded: Noto Color Emoji")
             }
-            
+
             initialized = true
             println("[TextRenderer] 🎉 Font initialization complete!")
         } catch (e: Exception) {
@@ -75,18 +69,19 @@ actual object TextRenderer {
             e.printStackTrace()
         }
     }
-    
+
     /**
      * 从资源加载字体文件
      */
     private fun loadFont(resourcePath: String): Typeface? {
         return try {
-            val inputStream = this::class.java.classLoader.getResourceAsStream(resourcePath)
-                ?: throw IllegalArgumentException("Font resource not found: $resourcePath")
-            
+            val inputStream =
+                this::class.java.classLoader.getResourceAsStream(resourcePath)
+                    ?: throw IllegalArgumentException("Font resource not found: $resourcePath")
+
             val fontData = inputStream.readBytes()
             inputStream.close()
-            
+
             // 使用 FontMgr 从字节数组创建字体
             fontMgr.makeFromData(Data.makeFromBytes(fontData))
         } catch (e: Exception) {
@@ -94,7 +89,7 @@ actual object TextRenderer {
             null
         }
     }
-    
+
     /**
      * 判断字符是否为 Emoji
      */
@@ -128,41 +123,44 @@ actual object TextRenderer {
             else -> false
         }
     }
-    
+
     /**
      * 判断是否是 CJK 字符
      */
     private fun isCjkChar(char: Char): Boolean {
         val code = char.code
         return when {
-            code in 0x4E00..0x9FFF -> true  // CJK Unified Ideographs
-            code in 0x3400..0x4DBF -> true  // CJK Extension A
-            code in 0x20000..0x2A6DF -> true  // CJK Extension B
-            code in 0x2A700..0x2B73F -> true  // CJK Extension C
-            code in 0x2B740..0x2B81F -> true  // CJK Extension D
-            code in 0x2B820..0x2CEAF -> true  // CJK Extension E
-            code in 0x3000..0x303F -> true  // CJK Symbols and Punctuation
-            code in 0xFF00..0xFFEF -> true  // Halfwidth and Fullwidth Forms
+            code in 0x4E00..0x9FFF -> true // CJK Unified Ideographs
+            code in 0x3400..0x4DBF -> true // CJK Extension A
+            code in 0x20000..0x2A6DF -> true // CJK Extension B
+            code in 0x2A700..0x2B73F -> true // CJK Extension C
+            code in 0x2B740..0x2B81F -> true // CJK Extension D
+            code in 0x2B820..0x2CEAF -> true // CJK Extension E
+            code in 0x3000..0x303F -> true // CJK Symbols and Punctuation
+            code in 0xFF00..0xFFEF -> true // Halfwidth and Fullwidth Forms
             else -> false
         }
     }
-    
+
     /**
      * 获取适合字符的字体
      */
-    private fun getTypefaceForChar(char: Char, bold: Boolean): Typeface {
+    private fun getTypefaceForChar(
+        char: Char,
+        bold: Boolean,
+    ): Typeface {
         // 懒初始化
         if (!initialized) {
             initialize()
         }
-        
+
         // 优先级：Emoji > Nerd Font (嵌入) > CJK > 系统字体
         return when {
             // Emoji 字符 - 使用 Noto Color Emoji
             isEmoji(char) && emojiFont != null -> {
                 emojiFont!!
             }
-            
+
             // 普通字符 - 优先使用 Nerd Font
             !isCjkChar(char) -> {
                 when {
@@ -171,18 +169,21 @@ actual object TextRenderer {
                     else -> getFallbackTypeface(bold, isCjk = false)
                 }
             }
-            
+
             // CJK 字符 - 使用系统 CJK 字体
             else -> {
                 getFallbackTypeface(bold, isCjk = true)
             }
         }
     }
-    
+
     /**
      * 获取后备字体（如果嵌入字体加载失败）
      */
-    private fun getFallbackTypeface(bold: Boolean, isCjk: Boolean): Typeface {
+    private fun getFallbackTypeface(
+        bold: Boolean,
+        isCjk: Boolean,
+    ): Typeface {
         return when {
             isCjk -> {
                 if (cachedCjkTypeface == null) {
@@ -217,7 +218,7 @@ actual object TextRenderer {
             }
         }
     }
-    
+
     actual fun drawText(
         scope: DrawScope,
         text: String,
@@ -230,27 +231,29 @@ actual object TextRenderer {
         scope.drawIntoCanvas { canvas ->
             try {
                 val nativeCanvas = canvas.nativeCanvas
-                
+
                 // 创建画笔
-                val paint = Paint().apply {
-                    val r = (color.red * 255).toInt().coerceIn(0, 255)
-                    val g = (color.green * 255).toInt().coerceIn(0, 255)
-                    val b = (color.blue * 255).toInt().coerceIn(0, 255)
-                    val a = (color.alpha * 255).toInt().coerceIn(0, 255)
-                    this.color = org.jetbrains.skia.Color.makeRGB(r, g, b)
-                    alpha = a
-                    isAntiAlias = true
-                }
-                
+                val paint =
+                    Paint().apply {
+                        val r = (color.red * 255).toInt().coerceIn(0, 255)
+                        val g = (color.green * 255).toInt().coerceIn(0, 255)
+                        val b = (color.blue * 255).toInt().coerceIn(0, 255)
+                        val a = (color.alpha * 255).toInt().coerceIn(0, 255)
+                        this.color = org.jetbrains.skia.Color.makeRGB(r, g, b)
+                        alpha = a
+                        isAntiAlias = true
+                    }
+
                 // 由于使用了混合字体，我们不能逐字符渲染
                 // 而是应该一次性渲染整个字符串，使用主字体
                 val firstChar = text.firstOrNull()
-                val typeface = if (firstChar != null) {
-                    getTypefaceForChar(firstChar, bold)
-                } else {
-                    nerdFontRegular ?: getFallbackTypeface(bold, isCjk = false)
-                }
-                
+                val typeface =
+                    if (firstChar != null) {
+                        getTypefaceForChar(firstChar, bold)
+                    } else {
+                        nerdFontRegular ?: getFallbackTypeface(bold, isCjk = false)
+                    }
+
                 val font = Font(typeface, fontSize)
                 nativeCanvas.drawString(text, x, y, font, paint)
             } catch (e: Exception) {
@@ -259,4 +262,3 @@ actual object TextRenderer {
         }
     }
 }
-

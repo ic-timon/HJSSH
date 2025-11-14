@@ -23,7 +23,10 @@ data class CursorState(
     /**
      * 移动到指定位置
      */
-    fun moveTo(x: Int, y: Int) {
+    fun moveTo(
+        x: Int,
+        y: Int,
+    ) {
         this.x = x.coerceAtLeast(0)
         this.y = y.coerceAtLeast(0)
         // 任何显式的光标移动都会取消待定的换行
@@ -33,7 +36,10 @@ data class CursorState(
     /**
      * 移动相对位置
      */
-    fun moveBy(dx: Int, dy: Int) {
+    fun moveBy(
+        dx: Int,
+        dy: Int,
+    ) {
         this.x = (this.x + dx).coerceAtLeast(0)
         this.y = (this.y + dy).coerceAtLeast(0)
         // 任何显式的光标移动都会取消待定的换行
@@ -57,7 +63,7 @@ data class CursorState(
         y = savedY
         currentStyle = savedStyle
     }
-    
+
     /**
      * 保存当前光标位置和样式（用于 alternate screen 切换）
      */
@@ -67,7 +73,7 @@ data class CursorState(
         altScreenSavedStyle = currentStyle
         println("      [Cursor] Saved for alt screen: ($altScreenSavedX, $altScreenSavedY)")
     }
-    
+
     /**
      * 恢复 alternate screen 切换时保存的光标位置和样式
      */
@@ -133,5 +139,3 @@ data class CellStyle(
         fun default(): CellStyle = CellStyle()
     }
 }
-
-

@@ -16,17 +16,19 @@ data class SshConfig(
         val exactMatch = hosts.firstOrNull { it.host == hostName }
 
         // 查找所有匹配的通配符配置（包括 *）
-        val wildcardMatches = hosts.filter { 
-            it.host != hostName && matchesPattern(it.host, hostName)
-        }.sortedByDescending { it.host.length } // 更具体的模式优先
+        val wildcardMatches =
+            hosts.filter {
+                it.host != hostName && matchesPattern(it.host, hostName)
+            }.sortedByDescending { it.host.length } // 更具体的模式优先
 
         // 如果找到精确匹配，先应用通配符配置，再应用精确匹配配置
         if (exactMatch != null) {
             // 先合并所有通配符配置
-            val baseConfig = wildcardMatches.reduceOrNull { acc, config ->
-                config.mergeWith(acc)
-            }
-            
+            val baseConfig =
+                wildcardMatches.reduceOrNull { acc, config ->
+                    config.mergeWith(acc)
+                }
+
             // 然后应用精确匹配配置（精确匹配优先）
             return if (baseConfig != null) {
                 exactMatch.mergeWith(baseConfig)
@@ -50,7 +52,10 @@ data class SshConfig(
      * 检查 host 名称是否匹配模式
      * 支持 * 通配符（如 *.example.com）
      */
-    private fun matchesPattern(pattern: String, hostName: String): Boolean {
+    private fun matchesPattern(
+        pattern: String,
+        hostName: String,
+    ): Boolean {
         if (pattern == "*") return true
         if (pattern == hostName) return true
 
@@ -61,12 +66,12 @@ data class SshConfig(
         }
 
         // 支持简单的通配符匹配
-        val regex = pattern
-            .replace(".", "\\.")
-            .replace("*", ".*")
-            .toRegex()
+        val regex =
+            pattern
+                .replace(".", "\\.")
+                .replace("*", ".*")
+                .toRegex()
 
         return regex.matches(hostName)
     }
 }
-

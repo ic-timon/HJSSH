@@ -22,7 +22,10 @@ class TerminalLine(
     /**
      * 设置指定位置的单元格
      */
-    fun setCell(index: Int, cell: TerminalCell) {
+    fun setCell(
+        index: Int,
+        cell: TerminalCell,
+    ) {
         // 确保列表足够大
         while (cells.size <= index && cells.size < maxWidth) {
             cells.add(TerminalCell.empty())
@@ -56,7 +59,10 @@ class TerminalLine(
     /**
      * 从指定位置开始插入字符
      */
-    fun insertAt(index: Int, cell: TerminalCell) {
+    fun insertAt(
+        index: Int,
+        cell: TerminalCell,
+    ) {
         if (index >= maxWidth) return
         cells.add(index, cell)
         // 如果超出最大宽度，移除末尾
@@ -94,6 +100,3 @@ class TerminalLine(
         return newLine
     }
 }
-
-
-

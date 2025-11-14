@@ -14,18 +14,75 @@ data class KeyEvent(
  */
 enum class Key {
     // 字母和数字
-    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-    Digit0, Digit1, Digit2, Digit3, Digit4, Digit5, Digit6, Digit7, Digit8, Digit9,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
+    Digit0,
+    Digit1,
+    Digit2,
+    Digit3,
+    Digit4,
+    Digit5,
+    Digit6,
+    Digit7,
+    Digit8,
+    Digit9,
 
     // 功能键
-    F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
 
     // 方向键
-    Up, Down, Left, Right,
+    Up,
+    Down,
+    Left,
+    Right,
 
     // 控制键
-    Enter, Tab, Backspace, Delete, Insert, Home, End, PageUp, PageDown,
-    Escape, Space,
+    Enter,
+    Tab,
+    Backspace,
+    Delete,
+    Insert,
+    Home,
+    End,
+    PageUp,
+    PageDown,
+    Escape,
+    Space,
 
     // 其他
     Unknown,
@@ -44,8 +101,8 @@ enum class KeyModifier {
  * 终端模式
  */
 enum class TerminalMode {
-    NORMAL,      // 正常模式
-    APP_KEY,     // 应用键模式（用于功能键）
+    NORMAL, // 正常模式
+    APP_KEY, // 应用键模式（用于功能键）
 }
 
 /**
@@ -106,41 +163,42 @@ class KeyMapper(
      * 映射 Ctrl+字符组合
      */
     private fun mapCtrlChar(char: Char): ByteArray {
-        val code = when (char.uppercaseChar()) {
-            '@' -> 0x00
-            'A' -> 0x01
-            'B' -> 0x02
-            'C' -> 0x03 // Ctrl+C (中断)
-            'D' -> 0x04 // Ctrl+D (EOF)
-            'E' -> 0x05
-            'F' -> 0x06
-            'G' -> 0x07
-            'H' -> 0x08 // Ctrl+H (退格)
-            'I' -> 0x09 // Ctrl+I (Tab)
-            'J' -> 0x0A // Ctrl+J (换行)
-            'K' -> 0x0B
-            'L' -> 0x0C // Ctrl+L (清屏)
-            'M' -> 0x0D // Ctrl+M (回车)
-            'N' -> 0x0E
-            'O' -> 0x0F
-            'P' -> 0x10
-            'Q' -> 0x11 // Ctrl+Q (恢复)
-            'R' -> 0x12
-            'S' -> 0x13 // Ctrl+S (暂停)
-            'T' -> 0x14
-            'U' -> 0x15
-            'V' -> 0x16
-            'W' -> 0x17
-            'X' -> 0x18
-            'Y' -> 0x19
-            'Z' -> 0x1A // Ctrl+Z (挂起)
-            '[' -> 0x1B // Ctrl+[ (ESC)
-            '\\' -> 0x1C
-            ']' -> 0x1D
-            '^' -> 0x1E
-            '_' -> 0x1F
-            else -> char.code and 0x1F
-        }
+        val code =
+            when (char.uppercaseChar()) {
+                '@' -> 0x00
+                'A' -> 0x01
+                'B' -> 0x02
+                'C' -> 0x03 // Ctrl+C (中断)
+                'D' -> 0x04 // Ctrl+D (EOF)
+                'E' -> 0x05
+                'F' -> 0x06
+                'G' -> 0x07
+                'H' -> 0x08 // Ctrl+H (退格)
+                'I' -> 0x09 // Ctrl+I (Tab)
+                'J' -> 0x0A // Ctrl+J (换行)
+                'K' -> 0x0B
+                'L' -> 0x0C // Ctrl+L (清屏)
+                'M' -> 0x0D // Ctrl+M (回车)
+                'N' -> 0x0E
+                'O' -> 0x0F
+                'P' -> 0x10
+                'Q' -> 0x11 // Ctrl+Q (恢复)
+                'R' -> 0x12
+                'S' -> 0x13 // Ctrl+S (暂停)
+                'T' -> 0x14
+                'U' -> 0x15
+                'V' -> 0x16
+                'W' -> 0x17
+                'X' -> 0x18
+                'Y' -> 0x19
+                'Z' -> 0x1A // Ctrl+Z (挂起)
+                '[' -> 0x1B // Ctrl+[ (ESC)
+                '\\' -> 0x1C
+                ']' -> 0x1D
+                '^' -> 0x1E
+                '_' -> 0x1F
+                else -> char.code and 0x1F
+            }
         return byteArrayOf(code.toByte())
     }
 
@@ -176,6 +234,3 @@ class KeyMapper(
      */
     fun getMode(): TerminalMode = mode
 }
-
-
-

@@ -17,4 +17,3 @@ expect object TextRenderer {
         bold: Boolean = false,
     )
 }
-

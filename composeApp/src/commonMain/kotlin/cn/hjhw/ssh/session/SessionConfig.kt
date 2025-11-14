@@ -27,14 +27,14 @@ data class SessionConfig(
     sealed class SerializedAuthMethod {
         @Serializable
         data class Password(val password: String) : SerializedAuthMethod()
-        
+
         @Serializable
         data class KeyFile(val keyPath: String, val passphrase: String? = null) : SerializedAuthMethod()
-        
+
         @Serializable
         object None : SerializedAuthMethod()
     }
-    
+
     /**
      * 转换为 SshAuthMethod
      */
@@ -45,7 +45,7 @@ data class SessionConfig(
             is SerializedAuthMethod.None -> cn.hjhw.ssh.connection.SshAuthMethod.None
         }
     }
-    
+
     companion object {
         /**
          * 从 SshAuthMethod 创建 SerializedAuthMethod
@@ -59,6 +59,3 @@ data class SessionConfig(
         }
     }
 }
-
-
-

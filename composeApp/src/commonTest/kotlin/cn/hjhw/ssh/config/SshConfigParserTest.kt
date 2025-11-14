@@ -10,13 +10,14 @@ class SshConfigParserTest {
 
     @Test
     fun testParseBasicConfig() {
-        val content = """
+        val content =
+            """
             Host test
               HostName 198.51.100.10
               User testuser
               Port 2222
               IdentityFile ~/.ssh/id_rsa
-        """.trimIndent()
+            """.trimIndent()
 
         val config = parser.parseContent(content, "/tmp/config")
 
@@ -33,13 +34,14 @@ class SshConfigParserTest {
 
     @Test
     fun testParseMultipleHostsWithWildcard() {
-        val content = """
+        val content =
+            """
             Host *
               User common
             Host server1
               HostName example.com
               Port 22
-        """.trimIndent()
+            """.trimIndent()
 
         val config = parser.parseContent(content)
 
@@ -62,12 +64,13 @@ class SshConfigParserTest {
 
     @Test
     fun testParseErrorTolerance() {
-        val content = """
+        val content =
+            """
             Host test
               HostName
               Port abc
               UnknownKey something
-        """.trimIndent()
+            """.trimIndent()
 
         val config = parser.parseContent(content)
 
@@ -81,12 +84,13 @@ class SshConfigParserTest {
 
     @Test
     fun testCaseInsensitive() {
-        val content = """
+        val content =
+            """
             Host test
               HOSTNAME example.com
               USER admin
               PORT 2222
-        """.trimIndent()
+            """.trimIndent()
 
         val config = parser.parseContent(content)
 
@@ -98,12 +102,13 @@ class SshConfigParserTest {
 
     @Test
     fun testWildcardPatternMatching() {
-        val content = """
+        val content =
+            """
             Host *.example.com
               User admin
             Host server1.example.com
               HostName 198.51.100.1
-        """.trimIndent()
+            """.trimIndent()
 
         val config = parser.parseContent(content)
 
@@ -122,12 +127,13 @@ class SshConfigParserTest {
 
     @Test
     fun testForwardAgent() {
-        val content = """
+        val content =
+            """
             Host test
               ForwardAgent yes
             Host test2
               ForwardAgent no
-        """.trimIndent()
+            """.trimIndent()
 
         val config = parser.parseContent(content)
 
@@ -140,14 +146,15 @@ class SshConfigParserTest {
 
     @Test
     fun testCommentsAndEmptyLines() {
-        val content = """
+        val content =
+            """
             # This is a comment
             Host test
               HostName example.com
               # Another comment
               
               User admin
-        """.trimIndent()
+            """.trimIndent()
 
         val config = parser.parseContent(content)
 
@@ -157,6 +164,3 @@ class SshConfigParserTest {
         assertEquals("admin", host.user)
     }
 }
-
-
-

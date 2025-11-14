@@ -12,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cn.hjhw.ssh.config.SshConfigParser
 import cn.hjhw.ssh.config.SshHostConfig
@@ -29,42 +28,45 @@ fun SshHostSidebar(
     var hosts by remember { mutableStateOf<List<SshHostConfig>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    
+
     // 加载 SSH 配置
     LaunchedEffect(Unit) {
         isLoading = true
         error = null
         try {
             val config = SshConfigParser.parse()
-            hosts = config.hosts.filter { 
-                // 过滤掉通配符 host（如 *），只显示具体的 host
-                it.host != "*" && !it.host.startsWith("*.")
-            }
+            hosts =
+                config.hosts.filter {
+                    // 过滤掉通配符 host（如 *），只显示具体的 host
+                    it.host != "*" && !it.host.startsWith("*.")
+                }
         } catch (e: Exception) {
             error = e.message ?: "Failed to load SSH config"
         } finally {
             isLoading = false
         }
     }
-    
+
     // 侧边栏宽度：展开时 250.dp，收起时只显示按钮（48.dp）
     val sidebarWidth by animateDpAsState(
         targetValue = if (isExpanded) 250.dp else 48.dp,
         animationSpec = tween(300),
-        label = "sidebarWidth"
+        label = "sidebarWidth",
     )
-    
+
     Column(
-        modifier = modifier
-            .width(sidebarWidth)  // 固定宽度，根据展开状态变化
-            .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+        modifier =
+            modifier
+                .width(sidebarWidth) // 固定宽度，根据展开状态变化
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         // 顶部展开/收起按钮（始终显示）
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -78,7 +80,7 @@ fun SshHostSidebar(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            
+
             // 标题（仅在展开时显示）
             AnimatedVisibility(
                 visible = isExpanded,
@@ -91,37 +93,41 @@ fun SshHostSidebar(
                 )
             }
         }
-        
+
         // 侧边栏内容（可展开/收起）
         AnimatedVisibility(
             visible = isExpanded,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(),
             ) {
                 HorizontalDivider()
-                
+
                 // Host 列表
                 if (isLoading) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator()
                     }
                 } else if (error != null) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(16.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(16.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Column(
@@ -142,9 +148,10 @@ fun SshHostSidebar(
                     }
                 } else if (hosts.isEmpty()) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -182,12 +189,14 @@ private fun HostItem(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
@@ -199,7 +208,7 @@ private fun HostItem(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            
+
             host.hostName?.let { hostName ->
                 Text(
                     text = hostName,
@@ -207,7 +216,7 @@ private fun HostItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -218,7 +227,7 @@ private fun HostItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                
+
                 host.port?.let { port ->
                     Text(
                         text = ":$port",
@@ -230,4 +239,3 @@ private fun HostItem(
         }
     }
 }
-

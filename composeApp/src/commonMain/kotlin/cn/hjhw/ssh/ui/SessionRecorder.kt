@@ -1,8 +1,8 @@
 package cn.hjhw.ssh.ui
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -63,7 +63,7 @@ class SessionRecorder {
                 SessionEvent.Output(
                     timestamp = System.currentTimeMillis() - startTime,
                     data = data,
-                )
+                ),
             )
         }
     }
@@ -77,7 +77,7 @@ class SessionRecorder {
                 SessionEvent.Input(
                     timestamp = System.currentTimeMillis() - startTime,
                     data = data,
-                )
+                ),
             )
         }
     }
@@ -91,14 +91,16 @@ class SessionRecorder {
      * 序列化为 JSON
      */
     fun toJson(): String {
-        val json = Json {
-            serializersModule = SerializersModule {
-                polymorphic(SessionEvent::class) {
-                    subclass(SessionEvent.Output::class)
-                    subclass(SessionEvent.Input::class)
-                }
+        val json =
+            Json {
+                serializersModule =
+                    SerializersModule {
+                        polymorphic(SessionEvent::class) {
+                            subclass(SessionEvent.Output::class)
+                            subclass(SessionEvent.Input::class)
+                        }
+                    }
             }
-        }
         return json.encodeToString(ListSerializer(SessionEvent.serializer()), events)
     }
 
@@ -106,14 +108,16 @@ class SessionRecorder {
      * 从 JSON 反序列化
      */
     fun fromJson(jsonString: String) {
-        val json = Json {
-            serializersModule = SerializersModule {
-                polymorphic(SessionEvent::class) {
-                    subclass(SessionEvent.Output::class)
-                    subclass(SessionEvent.Input::class)
-                }
+        val json =
+            Json {
+                serializersModule =
+                    SerializersModule {
+                        polymorphic(SessionEvent::class) {
+                            subclass(SessionEvent.Output::class)
+                            subclass(SessionEvent.Input::class)
+                        }
+                    }
             }
-        }
         events.clear()
         events.addAll(json.decodeFromString(ListSerializer(SessionEvent.serializer()), jsonString))
     }
@@ -144,7 +148,10 @@ class SessionReplayer(
     /**
      * 开始回放
      */
-    suspend fun start(onOutput: (String) -> Unit, onInput: (String) -> Unit) {
+    suspend fun start(
+        onOutput: (String) -> Unit,
+        onInput: (String) -> Unit,
+    ) {
         isPlaying = true
         startTime = System.currentTimeMillis()
         currentIndex = 0
@@ -152,16 +159,18 @@ class SessionReplayer(
         // 按时间顺序回放事件
         if (events.isNotEmpty()) {
             val firstEvent = events[0]
-            val baseTime = when (firstEvent) {
-                is SessionEvent.Output -> firstEvent.timestamp
-                is SessionEvent.Input -> firstEvent.timestamp
-            }
+            val baseTime =
+                when (firstEvent) {
+                    is SessionEvent.Output -> firstEvent.timestamp
+                    is SessionEvent.Input -> firstEvent.timestamp
+                }
 
             for (event in events) {
-                val eventTime = when (event) {
-                    is SessionEvent.Output -> event.timestamp
-                    is SessionEvent.Input -> event.timestamp
-                }
+                val eventTime =
+                    when (event) {
+                        is SessionEvent.Output -> event.timestamp
+                        is SessionEvent.Input -> event.timestamp
+                    }
                 val delay = eventTime - baseTime
                 if (delay > 0) {
                     kotlinx.coroutines.delay(delay)
@@ -199,4 +208,3 @@ class SessionReplayer(
         }
     }
 }
-
