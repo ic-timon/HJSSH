@@ -25,26 +25,51 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
+          cache: 'gradle'
 
-      - name: Cache Gradle dependencies
+      - name: Cache Kotlin compiler
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.kotlin
+            ~/.konan
+          key: ${{ runner.os }}-kotlin-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-kotlin-
+
+      - name: Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+            ~/.gradle/nodejs
+            .gradle
+            **/build/kotlin
+            **/build/generated
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Cache Compose
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.compose
+            ~/.cache/compose
+          key: ${{ runner.os }}-compose-${{ hashFiles('**/build.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-compose-
+
       - name: Grant execute permission for gradlew
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        if: matrix.os != 'windows-latest'
         run: chmod +x gradlew
 
       - name: Build project
-        run: ./gradlew build -x ktlintCheck -x ktlintFormat --no-daemon
+        run: ./gradlew build -x ktlintCheck -x ktlintFormat --no-daemon --configuration-cache --build-cache
 
       - name: Run tests
-        run: ./gradlew :composeApp:allTests --no-daemon
+        run: ./gradlew :composeApp:allTests --no-daemon --configuration-cache --build-cache
 
       - name: Upload test results
         if: always()

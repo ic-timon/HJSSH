@@ -14,6 +14,7 @@
 - [QUICK_RELEASE.md](QUICK_RELEASE.md) - **快速发布指南（3 步完成）** ⭐⭐⭐
 - [RELEASE_GUIDE.md](RELEASE_GUIDE.md) - **完整发布指南** ⭐⭐
 - [CI_TEST_CONFIGURATION.md](CI_TEST_CONFIGURATION.md) - **CI 测试配置说明** ⭐
+- [CI_CD_OPTIMIZATION.md](CI_CD_OPTIMIZATION.md) - **CI/CD 构建优化（提速 50-70%）** ⭐⭐⭐
 
 ### 🧪 测试文档
 - [TERMINAL_COMPATIBILITY_TEST_PLAN.md](TERMINAL_COMPATIBILITY_TEST_PLAN.md) - **终端兼容性测试计划** ⭐

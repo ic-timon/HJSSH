@@ -32,16 +32,41 @@ jobs:
         with:
           java-version: 17
           distribution: 'temurin'
+          cache: 'gradle'
 
-      - name: Cache Gradle dependencies
+      - name: Cache Kotlin compiler
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.kotlin
+            ~/.konan
+          key: ${{ runner.os }}-kotlin-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-kotlin-
+
+      - name: Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+            ~/.gradle/nodejs
+            .gradle
+            **/build/kotlin
+            **/build/generated
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Cache Compose
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.compose
+            ~/.cache/compose
+          key: ${{ runner.os }}-compose-${{ hashFiles('**/build.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-compose-
 
       - name: Grant execute permission for gradlew
         if: matrix.os != 'windows-latest'
@@ -49,15 +74,15 @@ jobs:
 
       - name: Build application package (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew :composeApp:packageDeb --no-daemon
+        run: ./gradlew :composeApp:packageDeb --no-daemon --configuration-cache --build-cache
 
       - name: Build application package (Windows)
         if: matrix.os == 'windows-latest'
-        run: .\gradlew.bat :composeApp:packageMsi --no-daemon
+        run: .\gradlew.bat :composeApp:packageMsi --no-daemon --configuration-cache --build-cache
 
       - name: Build application package (macOS)
         if: matrix.os == 'macos-latest'
-        run: ./gradlew :composeApp:packageDmg --no-daemon
+        run: ./gradlew :composeApp:packageDmg --no-daemon --configuration-cache --build-cache
 
       - name: Find built artifacts (Linux)
         if: matrix.os == 'ubuntu-latest'
