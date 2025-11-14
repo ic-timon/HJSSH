@@ -10,6 +10,11 @@
 - [MULTI_TAB_SUPPORT.md](MULTI_TAB_SUPPORT.md) - **多标签页支持** ⭐
 - [TESTING.md](TESTING.md) - 测试指南
 
+### 📦 发布与部署
+- [QUICK_RELEASE.md](QUICK_RELEASE.md) - **快速发布指南（3 步完成）** ⭐⭐⭐
+- [RELEASE_GUIDE.md](RELEASE_GUIDE.md) - **完整发布指南** ⭐⭐
+- [CI_TEST_CONFIGURATION.md](CI_TEST_CONFIGURATION.md) - **CI 测试配置说明** ⭐
+
 ### 🧪 测试文档
 - [TERMINAL_COMPATIBILITY_TEST_PLAN.md](TERMINAL_COMPATIBILITY_TEST_PLAN.md) - **终端兼容性测试计划** ⭐
 - [TEST_AUTOMATION_README.md](TEST_AUTOMATION_README.md) - 自动化测试实现指南
