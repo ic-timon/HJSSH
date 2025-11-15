@@ -55,3 +55,4 @@ interface SshConnection {
      */
     suspend fun exec(command: String): String
 }
+

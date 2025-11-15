@@ -234,3 +234,4 @@ class KeyMapper(
      */
     fun getMode(): TerminalMode = mode
 }
+

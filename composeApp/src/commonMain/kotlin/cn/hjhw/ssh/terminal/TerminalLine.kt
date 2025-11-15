@@ -100,3 +100,4 @@ class TerminalLine(
         return newLine
     }
 }
+

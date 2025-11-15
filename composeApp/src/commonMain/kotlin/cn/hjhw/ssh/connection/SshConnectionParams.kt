@@ -31,3 +31,4 @@ data class SshConnectionParams(
     val keepAliveInterval: Long = 30000, // 毫秒
     val connectTimeout: Long = 10000, // 毫秒
 )
+

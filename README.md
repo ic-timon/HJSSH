@@ -11,7 +11,7 @@
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/pulls)
 
 [![GitHub License](https://img.shields.io/github/license/ic-timon/HJSSH?style=flat-square)](https://github.com/ic-timon/HJSSH/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-v1.2.1-green.svg?style=flat-square)](https://github.com/ic-timon/HJSSH)
+
 
 ---
 
@@ -373,7 +373,7 @@ Host myserver
 
 ### 📄 许可证
 
-[待添加]
+[MIT]
 
 ### 🙏 致谢
 

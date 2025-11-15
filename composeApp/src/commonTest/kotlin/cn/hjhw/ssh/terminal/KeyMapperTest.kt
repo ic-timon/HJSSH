@@ -108,3 +108,4 @@ class KeyMapperTest {
         assertEquals("ls\r", command)
     }
 }
+

@@ -82,6 +82,13 @@ compose.desktop {
             copyright = "© 2024 HJSSH. All rights reserved."
             vendor = "HJSSH Project"
 
+            // 添加字体资源打包
+            // 这会将 commonMain/resources 下的所有文件打包到应用中
+            modules("java.instrument", "jdk.crypto.ec", "java.sql")
+            
+            // 显式包含字体资源
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("composeApp/src/commonMain/resources"))
+
             // 应用图标
             // 注意：这里的路径相对于 src/jvmMain/resources/
             // 如果图标在 commonMain/resources，会自动找到
